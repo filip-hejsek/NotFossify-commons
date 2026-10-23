@@ -35,5 +35,7 @@ property (see its `settings.gradle.kts`), e.g. `-PcommonsDir=../notfossify-commo
 
 ## Building
 
-Cloud sandboxes usually have no Android SDK, so code there can't be compiled. Say so when handing
-over uncompiled changes; the build is checked locally.
+Cloud sandboxes can build with `./gradlew :commons:assembleDebug :samples:assembleDebug`, given an
+Android SDK (`ANDROID_HOME`). The environment needs network access to `dl.google.com`, `jitpack.io`
+and Maven Central; Maven Central may answer 429, in which case just rerun the build (downloads are
+cached).
