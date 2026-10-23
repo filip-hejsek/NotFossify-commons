@@ -13,11 +13,11 @@ general audience.
 - Keep AGP/Kotlin/KSP versions in `gradle/libs.versions.toml` in sync with the music player:
   it builds this repo as an included build, which requires matching plugin versions.
 
-## Local development with the music player
+## Use from the music player
 
-The music player opts in to building against a local checkout with the `commonsDir` Gradle
-property (see its `settings.gradle.kts`), e.g. `-PcommonsDir=../notfossify-commons` or
-`commonsDir=...` in `~/.gradle/gradle.properties`.
+The music player includes this repo as a git submodule (`notfossify-commons`, tracking `dev`) and
+builds it as an included build; `-PcommonsDir=...` there points it at another checkout. After
+pushing to `dev`, bump the submodule pointer in the music player.
 
 ## Changes from upstream
 
