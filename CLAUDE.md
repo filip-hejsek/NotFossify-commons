@@ -7,11 +7,11 @@ general audience.
 
 ## Background
 
-- Stack: Android library, Kotlin (plus some vendored Java), Compose and Views, Room, Gradle.
+- Stack: Android library, Kotlin, Compose (About/FAQ/licences screens) and Views, Gradle.
 - Keep the Maven coordinates (`org.fossify:commons`) and Kotlin package names (`org.fossify.commons`)
   so the music player can substitute this fork for the published artifact without code changes.
-- Keep AGP/Kotlin/KSP versions in `gradle/libs.versions.toml` in sync with the music player:
-  it builds this repo as an included build, which requires matching plugin versions.
+- Keep AGP/Kotlin versions in `gradle/libs.versions.toml` in sync with the music player: it builds
+  this repo as an included build, which requires matching plugin versions.
 
 ## Use from the music player
 
@@ -21,10 +21,19 @@ pushing to `dev`, bump the submodule pointer in the music player.
 
 ## Changes from upstream
 
-- PatternLockView (`com.andrognito.patternlockview`, Apache-2.0, upstream
-  `aritraroy/PatternLockView` at `a90b0d4bf0`) is vendored into `commons/src/main/java`, migrated
-  from the legacy support library to AndroidX. It was the only dependency requiring Jetifier, which
-  is now disabled. Its resources live in `commons/src/main/res/values/patternlockview_*.xml`.
+- Stripped down to what the music player uses: unused code (including class members) and
+  resources were removed, along with the samples app and the upstream org infrastructure (CI
+  workflows, dependabot, CODEOWNERS, contributing guide). When the music player needs something
+  that was removed, restore it from `main` (which mirrors upstream).
+- No anti-fork behavior: the "fake version" dialog, the package-name gates in the SAF handlers and
+  the sideloading check (which pointed at a Play Store listing) are gone.
+- No Fossify ecosystem integration or upsells: no rate/donate prompts, no Thank You app
+  integration (global theme/font sync, purchase prompts), no Customize colors screen.
+- The About screen shows only the FAQ, a source code link (`getRepositoryUrl()`, supplied by the
+  app), third-party licences and the version.
+- The app lock and protected/hidden folder features were removed (the music player had no settings
+  to enable them), and with them the biometric and Reprint dependencies and PatternLockView. The
+  latter was the only dependency requiring Jetifier, which is disabled.
 
 ## Git workflow
 
@@ -35,7 +44,7 @@ pushing to `dev`, bump the submodule pointer in the music player.
 
 ## Building
 
-Cloud sandboxes can build with `./gradlew :commons:assembleDebug :samples:assembleDebug`, given an
-Android SDK (`ANDROID_HOME`). The environment needs network access to `dl.google.com`, `jitpack.io`
-and Maven Central; Maven Central may answer 429, in which case just rerun the build (downloads are
-cached).
+Build and verify through the music player (`./gradlew assembleDebug` there), since nothing in this
+repo exercises the library on its own. Cloud sandboxes can build given an Android SDK
+(`ANDROID_HOME`). The environment needs network access to `dl.google.com`, `jitpack.io` and Maven
+Central; Maven Central may answer 429, in which case just rerun the build (downloads are cached).
