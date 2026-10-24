@@ -105,10 +105,6 @@ open class MyRecyclerView : RecyclerView {
         }
     }
 
-    fun resetItemCount() {
-        totalItemCount = 0
-    }
-
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (!dragSelectActive) {
             try {
@@ -202,11 +198,6 @@ open class MyRecyclerView : RecyclerView {
     fun setupDragListener(dragListener: MyDragListener?) {
         isDragSelectionEnabled = dragListener != null
         this.dragListener = dragListener
-    }
-
-    fun setupZoomListener(zoomListener: MyZoomListener?) {
-        isZoomEnabled = zoomListener != null
-        this.zoomListener = zoomListener
     }
 
     fun setDragSelectActive(initialSelection: Int) {

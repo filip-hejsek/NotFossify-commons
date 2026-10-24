@@ -10,13 +10,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import org.fossify.commons.R
 import org.fossify.commons.compose.components.LinkifyTextComponent
-import org.fossify.commons.compose.extensions.MyDevices
 import org.fossify.commons.compose.lists.SimpleLazyListScaffold
 import org.fossify.commons.compose.settings.SettingsHorizontalDivider
-import org.fossify.commons.compose.theme.AppThemeSurface
 import org.fossify.commons.compose.theme.SimpleTheme
 import org.fossify.commons.extensions.fromHtml
 import org.fossify.commons.models.FAQItem
@@ -72,22 +69,5 @@ internal fun FAQScreen(
                 }
             }
         }
-    }
-}
-
-@MyDevices
-@Composable
-private fun FAQScreenPreview() {
-    AppThemeSurface {
-        FAQScreen(
-            goBack = {},
-            faqItems = listOf(
-                FAQItem(R.string.faq_1_title_commons, R.string.faq_1_text_commons),
-                FAQItem(R.string.faq_1_title_commons, R.string.faq_1_text_commons),
-                FAQItem(R.string.faq_4_title_commons, R.string.faq_4_text_commons),
-                FAQItem(R.string.faq_2_title_commons, R.string.faq_2_text_commons),
-                FAQItem(R.string.faq_6_title_commons, R.string.faq_6_text_commons)
-            ).toImmutableList()
-        )
     }
 }

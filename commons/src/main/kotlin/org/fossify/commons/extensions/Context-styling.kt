@@ -1,29 +1,18 @@
 package org.fossify.commons.extensions
 
 import android.annotation.SuppressLint
-import android.content.ComponentName
 import android.content.Context
-import android.content.pm.PackageManager
-import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
 import android.view.ViewGroup
-import androidx.loader.content.CursorLoader
 import com.google.android.material.color.MaterialColors
 import org.fossify.commons.R
 import org.fossify.commons.helpers.DARK_GREY
 import org.fossify.commons.helpers.FONT_TYPE_CUSTOM
 import org.fossify.commons.helpers.FONT_TYPE_SYSTEM_DEFAULT
 import org.fossify.commons.helpers.FontHelper
-import org.fossify.commons.helpers.MyContentProvider
-import org.fossify.commons.helpers.MyContentProvider.GLOBAL_THEME_SYSTEM
-import org.fossify.commons.helpers.appIconColorStrings
-import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isSPlus
-import org.fossify.commons.models.GlobalConfig
-import org.fossify.commons.models.isGlobalThemingEnabled
 import org.fossify.commons.views.MyAppCompatCheckbox
 import org.fossify.commons.views.MyAppCompatSpinner
 import org.fossify.commons.views.MyAutoCompleteTextView
@@ -115,23 +104,6 @@ fun Context.updateTextColors(viewGroup: ViewGroup) {
     }
 }
 
-fun Context.getTimePickerDialogTheme() = when {
-    isDynamicTheme() -> if (isSystemInDarkMode()) {
-        R.style.MyTimePickerMaterialTheme_Dark
-    } else {
-        R.style.MyDateTimePickerMaterialTheme
-    }
-
-    baseConfig.backgroundColor.getContrastColor() == Color.WHITE -> R.style.MyDialogTheme_Dark
-    else -> R.style.MyDialogTheme
-}
-
-fun Context.getDatePickerDialogTheme() = when {
-    isDynamicTheme() -> R.style.MyDateTimePickerMaterialTheme
-    baseConfig.backgroundColor.getContrastColor() == Color.WHITE -> R.style.MyDialogTheme_Dark
-    else -> R.style.MyDialogTheme
-}
-
 fun Context.getPopupMenuTheme(): Int {
     return if (isDynamicTheme()) {
         if (isSystemInDarkMode()) {
@@ -166,73 +138,9 @@ private fun Context.validateFontSettings() {
     }
 }
 
-fun Context.withGlobalConfig(callback: (globalConfig: GlobalConfig?) -> Unit) {
-    if (!isThankYouInstalled()) {
-        callback(null)
-    } else {
-        val cursorLoader = getMyContentProviderCursorLoader()
-        ensureBackgroundThread {
-            callback(getGlobalConfig(cursorLoader))
-        }
-    }
-}
-
-fun Context.getGlobalConfig(cursorLoader: CursorLoader): GlobalConfig? {
-    val cursor = cursorLoader.loadInBackground()
-    cursor?.use {
-        if (cursor.moveToFirst()) {
-            try {
-                return GlobalConfig(
-                    themeType = cursor.getIntValue(MyContentProvider.COL_THEME_TYPE),
-                    textColor = cursor.getIntValue(MyContentProvider.COL_TEXT_COLOR),
-                    backgroundColor = cursor.getIntValue(MyContentProvider.COL_BACKGROUND_COLOR),
-                    primaryColor = cursor.getIntValue(MyContentProvider.COL_PRIMARY_COLOR),
-                    accentColor = cursor.getIntValue(MyContentProvider.COL_ACCENT_COLOR),
-                    appIconColor = cursor.getIntValue(MyContentProvider.COL_APP_ICON_COLOR),
-                    showCheckmarksOnSwitches = cursor.getIntValue(MyContentProvider.COL_SHOW_CHECKMARKS_ON_SWITCHES) != 0,
-                    lastUpdatedTS = cursor.getIntValue(MyContentProvider.COL_LAST_UPDATED_TS),
-                    fontType = cursor.getIntValueOr(MyContentProvider.COL_FONT_TYPE, -1),
-                    fontName = cursor.getStringValueOr(MyContentProvider.COL_FONT_NAME, ""),
-                    useBinaryStorageUnits = cursor.getIntValueOr(MyContentProvider.COL_USE_BINARY_STORAGE_UNITS, 0) != 0
-                )
-            } catch (_: Exception) {
-            }
-        }
-    }
-    return null
-}
-
 fun Context.ensureFontPresentLocally(fontName: String): Boolean {
     if (fontName.isEmpty()) return false
     return File(FontHelper.getFontsDir(this), fontName).exists()
-}
-
-fun Context.checkAppIconColor() {
-    val appId = baseConfig.appId
-    if (appId.isNotEmpty() && baseConfig.lastIconColor != baseConfig.appIconColor) {
-        getAppIconColors().forEachIndexed { index, color ->
-            toggleAppIconColor(appId, index, color, false)
-        }
-
-        getAppIconColors().forEachIndexed { index, color ->
-            if (baseConfig.appIconColor == color) {
-                toggleAppIconColor(appId, index, color, true)
-            }
-        }
-    }
-}
-
-fun Context.toggleAppIconColor(appId: String, colorIndex: Int, color: Int, enable: Boolean) {
-    val className = "${appId.removeSuffix(".debug")}.activities.SplashActivity${appIconColorStrings[colorIndex]}"
-    val state = if (enable) COMPONENT_ENABLED_STATE_ENABLED else COMPONENT_ENABLED_STATE_DISABLED
-    try {
-        packageManager.setComponentEnabledSetting(ComponentName(appId, className), state, PackageManager.DONT_KILL_APP)
-        if (enable) {
-            baseConfig.lastIconColor = color
-        }
-    } catch (e: Exception) {
-        showErrorToast(e)
-    }
 }
 
 fun Context.getAppIconColors() = resources.getIntArray(R.array.md_app_icon_colors).toCollection(ArrayList())

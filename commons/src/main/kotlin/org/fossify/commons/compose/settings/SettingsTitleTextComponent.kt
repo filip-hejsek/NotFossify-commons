@@ -8,8 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import org.fossify.commons.compose.extensions.MyDevices
-import org.fossify.commons.compose.theme.AppThemeSurface
 import org.fossify.commons.compose.theme.SimpleTheme
 
 @Composable
@@ -30,10 +28,4 @@ fun SettingsTitleTextComponent(
             overflow = overflow
         )
     }
-}
-
-@MyDevices
-@Composable
-private fun SettingsTitleTextComponentPreview() = AppThemeSurface {
-    SettingsTitleTextComponent(text = "Color customization")
 }

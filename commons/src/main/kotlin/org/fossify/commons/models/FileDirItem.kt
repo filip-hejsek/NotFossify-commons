@@ -3,7 +3,6 @@ package org.fossify.commons.models
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.compose.runtime.Immutable
 import com.bumptech.glide.signature.ObjectKey
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.*
@@ -124,8 +123,6 @@ open class FileDirItem(
 
     fun getDuration(context: Context) = context.getDuration(path)?.getFormattedDuration()
 
-    fun getFileDurationSeconds(context: Context) = context.getDuration(path)
-
     fun getArtist(context: Context) = context.getArtist(path)
 
     fun getAlbum(context: Context) = context.getAlbum(path)
@@ -137,8 +134,6 @@ open class FileDirItem(
     fun getVideoResolution(context: Context) = context.getVideoResolution(path)
 
     fun getImageResolution(context: Context) = context.getImageResolution(path)
-
-    fun getPublicUri(context: Context) = context.getDocumentFile(path)?.uri ?: ""
 
     fun getSignature(): String {
         val lastModified = if (modified > 1) {
@@ -162,34 +157,3 @@ open class FileDirItem(
         return Uri.withAppendedPath(uri, mediaStoreId.toString())
     }
 }
-
-fun FileDirItem.asReadOnly() = FileDirItemReadOnly(
-    path = path,
-    name = name,
-    isDirectory = isDirectory,
-    children = children,
-    size = size,
-    modified = modified,
-    mediaStoreId = mediaStoreId
-)
-
-fun FileDirItemReadOnly.asFileDirItem() = FileDirItem(
-    path = path,
-    name = name,
-    isDirectory = isDirectory,
-    children = children,
-    size = size,
-    modified = modified,
-    mediaStoreId = mediaStoreId
-)
-
-@Immutable
-class FileDirItemReadOnly(
-    path: String,
-    name: String = "",
-    isDirectory: Boolean = false,
-    children: Int = 0,
-    size: Long = 0L,
-    modified: Long = 0L,
-    mediaStoreId: Long = 0L
-) : FileDirItem(path, name, isDirectory, children, size, modified, mediaStoreId)

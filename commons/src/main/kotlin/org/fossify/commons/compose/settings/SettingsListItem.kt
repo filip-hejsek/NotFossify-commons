@@ -15,12 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.TextUnit
-import org.fossify.commons.R
-import org.fossify.commons.compose.extensions.BooleanPreviewParameterProvider
-import org.fossify.commons.compose.extensions.MyDevices
-import org.fossify.commons.compose.theme.AppThemeSurface
 import org.fossify.commons.compose.theme.SimpleTheme
 import org.fossify.commons.compose.theme.textSubTitleColor
 
@@ -93,7 +88,6 @@ fun SettingsListItem(
     )
 }
 
-
 @Composable
 fun SettingsListItem(
     modifier: Modifier = Modifier,
@@ -145,18 +139,4 @@ fun SettingsListItem(
             .fillMaxWidth()
             .clickable(enabled = click != null) { click?.invoke() }
     )
-}
-
-
-@MyDevices
-@Composable
-private fun PreviewSettingsListItem(@PreviewParameter(BooleanPreviewParameterProvider::class) isImage: Boolean) {
-    AppThemeSurface {
-        SettingsListItem(
-            click = {},
-            text = "Fossify",
-            icon = if (isImage) R.drawable.ic_telegram_vector else R.drawable.ic_dollar_vector,
-            isImage = isImage
-        )
-    }
 }

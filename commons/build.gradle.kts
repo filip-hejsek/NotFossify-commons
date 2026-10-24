@@ -3,10 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.library)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.parcelize)
     alias(libs.plugins.detekt)
     `maven-publish`
 }
@@ -22,9 +19,6 @@ android {
     defaultConfig {
         minSdk = libs.versions.app.build.minimumSDK.get().toInt()
         vectorDrawables.useSupportLibrary = true
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
     }
 
     buildTypes {
@@ -98,35 +92,24 @@ detekt {
 }
 
 dependencies {
-    implementation(libs.kotlinx.serialization.json)
     api(libs.kotlin.immutable.collections)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.documentfile)
-    implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.exifinterface)
-    implementation(libs.androidx.biometric.ktx)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.startup)
-    implementation(libs.ez.vcard)
 
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.compose)
     implementation(libs.compose.view.binding)
     debugImplementation(libs.bundles.compose.preview)
 
-    api(libs.joda.time)
     api(libs.recyclerView.fastScroller)
-    api(libs.reprint)
     api(libs.rtl.viewpager)
     api(libs.androidx.core.ktx)
     api(libs.androidx.appcompat)
     api(libs.material)
-    api(libs.gson)
 
     api(libs.glide)
-    ksp(libs.glide.compiler)
-
-    api(libs.bundles.room)
-    ksp(libs.androidx.room.compiler)
     detektPlugins(libs.compose.detekt)
 }

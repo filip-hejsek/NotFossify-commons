@@ -8,13 +8,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.fossify.commons.R
-import org.fossify.commons.compose.extensions.MyDevices
 import org.fossify.commons.compose.lists.SimpleColumnScaffold
 import org.fossify.commons.compose.settings.SettingsGroup
 import org.fossify.commons.compose.settings.SettingsHorizontalDivider
 import org.fossify.commons.compose.settings.SettingsListItem
 import org.fossify.commons.compose.settings.SettingsTitleTextComponent
-import org.fossify.commons.compose.theme.AppThemeSurface
 import org.fossify.commons.compose.theme.SimpleTheme
 
 private val titleStartPadding = Modifier.padding(start = 40.dp)
@@ -63,7 +61,6 @@ internal fun OtherSection(
         SettingsHorizontalDivider()
     }
 }
-
 
 @Composable
 internal fun AboutSection(
@@ -132,27 +129,4 @@ internal fun TwoLinerTextItem(text: String, icon: Int, click: () -> Unit) {
         maxLines = 2,
         overflow = TextOverflow.Ellipsis
     )
-}
-
-@MyDevices
-@Composable
-private fun AboutScreenPreview() {
-    AppThemeSurface {
-        AboutScreen(
-            goBack = {},
-            aboutSection = {
-                AboutSection(onFAQClick = {})
-            },
-            sourceCodeSection = {
-                SourceCodeSection(onSourceCodeClick = {})
-            }
-        ) {
-            OtherSection(
-                onLicenseClick = {},
-                versionName = "5.0.4",
-                packageName = "org.fossify.commons.samples",
-                onVersionClick = {}
-            )
-        }
-    }
 }

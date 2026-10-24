@@ -63,35 +63,4 @@ object FontHelper {
         }
     }
 
-    fun saveFontData(context: Context, fontData: ByteArray, fileName: String): Boolean {
-        return try {
-            val fontFile = File(getFontsDir(context), fileName)
-            fontFile.writeBytes(fontData)
-            true
-        } catch (_: Exception) {
-            false
-        }
-    }
-
-    fun getFontData(context: Context, fileName: String): ByteArray? {
-        if (fileName.isEmpty()) {
-            return null
-        }
-
-        return try {
-            val fontFile = File(getFontsDir(context), fileName)
-            if (fontFile.exists()) fontFile.readBytes() else null
-        } catch (_: Exception) {
-            null
-        }
-    }
-
-    fun deleteFont(context: Context, fileName: String): Boolean {
-        return try {
-            val fontFile = File(getFontsDir(context), fileName)
-            if (fontFile.exists()) fontFile.delete() else true
-        } catch (_: Exception) {
-            false
-        }
-    }
 }

@@ -72,17 +72,6 @@ open class MyAppBarLayout @JvmOverloads constructor(
         cachedToolbar = null
     }
 
-    fun setApplyWindowInsets(apply: Boolean) {
-        applyWindowInsets = apply
-        if (apply) {
-            ViewCompat.requestApplyInsets(this)
-        } else {
-            updatePaddingWithBase(top = 0, left = 0, right = 0)
-        }
-    }
-
-    fun isApplyWindowInsetsEnabled(): Boolean = applyWindowInsets
-
     fun requireToolbar(): MaterialToolbar =
         toolbar ?: error("MyAppBarLayout requires a Toolbar/MaterialToolbar child")
 

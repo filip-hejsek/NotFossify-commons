@@ -15,7 +15,6 @@ import org.fossify.commons.extensions.getProperBackgroundColor
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.extensions.hideKeyboard
 import org.fossify.commons.extensions.onTextChangeListener
-import org.fossify.commons.extensions.removeBit
 import org.fossify.commons.extensions.showKeyboard
 import org.fossify.commons.helpers.LOWER_ALPHA
 import org.fossify.commons.helpers.MEDIUM_ALPHA
@@ -58,10 +57,6 @@ open class MySearchMenu(context: Context, attrs: AttributeSet) : MyAppBarLayout(
         }
     }
 
-    fun focusView() {
-        binding.topToolbarSearch.requestFocus()
-    }
-
     private fun openSearch() {
         isSearchOpen = true
         onSearchOpenListener?.invoke()
@@ -82,25 +77,9 @@ open class MySearchMenu(context: Context, attrs: AttributeSet) : MyAppBarLayout(
 
     fun getCurrentQuery() = binding.topToolbarSearch.text.toString()
 
-    fun updateHintText(text: String) {
-        binding.topToolbarSearch.hint = text
-    }
-
     @Suppress("unused", "EmptyFunctionBlock")
     @Deprecated("This feature is broken for now.")
     fun toggleHideOnScroll(hideOnScroll: Boolean) {}
-
-    fun toggleForceArrowBackIcon(useArrowBack: Boolean) {
-        this.useArrowIcon = useArrowBack
-        val (icon, accessibilityString) = if (useArrowBack) {
-            Pair(R.drawable.ic_arrow_left_vector, R.string.back)
-        } else {
-            Pair(R.drawable.ic_search_vector, R.string.search)
-        }
-
-        binding.topToolbarSearchIcon.setImageResource(icon)
-        binding.topToolbarSearchIcon.contentDescription = resources.getString(accessibilityString)
-    }
 
     fun updateColors() {
         val backgroundColor = context.getProperBackgroundColor()

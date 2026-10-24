@@ -1,30 +1,16 @@
 package org.fossify.commons.extensions
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
-import android.icu.text.BreakIterator
-import android.os.Build
-import android.os.StatFs
 import android.provider.MediaStore
-import android.telephony.PhoneNumberUtils
 import android.text.*
 import android.text.style.ForegroundColorSpan
-import android.widget.TextView
-import com.bumptech.glide.signature.ObjectKey
 import org.fossify.commons.helpers.*
-import org.joda.time.DateTime
-import org.joda.time.Years
-import org.joda.time.format.DateTimeFormat
 import java.io.File
-import java.text.DateFormat
 import java.text.Normalizer
-import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.regex.Pattern
-import kotlin.math.abs
-
 
 fun String.getFilenameFromPath() = substring(lastIndexOf("/") + 1)
 
@@ -87,19 +73,9 @@ fun String.getOTGPublicPath(context: Context) =
 
 fun String.isMediaFile() = isImageFast() || isVideoFast() || isGif() || isRawFast() || isSvg() || isPortrait()
 
-fun String.isWebP() = endsWith(".webp", true)
-
 fun String.isGif() = endsWith(".gif", true)
 
-fun String.isPng() = endsWith(".png", true)
-
-fun String.isApng() = endsWith(".apng", true)
-
-fun String.isJpg() = endsWith(".jpg", true) or endsWith(".jpeg", true)
-
 fun String.isSvg() = endsWith(".svg", true)
-
-fun String.isAvif() = endsWith(".avif", true)
 
 fun String.isPortrait() = getFilenameFromPath().contains("portrait", true) && File(this).parentFile?.name?.startsWith("img_", true) == true
 
@@ -107,42 +83,24 @@ fun String.isPortrait() = getFilenameFromPath().contains("portrait", true) && Fi
 fun String.isVideoFast() = videoExtensions.any { endsWith(it, true) }
 
 fun String.isImageFast() = photoExtensions.any { endsWith(it, true) }
+
 fun String.isAudioFast() = audioExtensions.any { endsWith(it, true) }
+
 fun String.isRawFast() = rawExtensions.any { endsWith(it, true) }
 
 fun String.isImageSlow() = isImageFast() || getMimeType().startsWith("image") || startsWith(MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString())
-fun String.isVideoSlow() = isVideoFast() || getMimeType().startsWith("video") || startsWith(MediaStore.Video.Media.EXTERNAL_CONTENT_URI.toString())
-fun String.isAudioSlow() = isAudioFast() || getMimeType().startsWith("audio") || startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
 
-fun String.isFontFile() = endsWith(".ttf", true) || endsWith(".otf", true)
+fun String.isVideoSlow() = isVideoFast() || getMimeType().startsWith("video") || startsWith(MediaStore.Video.Media.EXTERNAL_CONTENT_URI.toString())
+
+fun String.isAudioSlow() = isAudioFast() || getMimeType().startsWith("audio") || startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())
 
 fun String.canModifyEXIF() = extensionsSupportingEXIF.any { endsWith(it, true) }
 
-fun String.getCompressionFormat() = when (getFilenameExtension().lowercase(Locale.getDefault())) {
-    "png" -> Bitmap.CompressFormat.PNG
-    "webp" -> Bitmap.CompressFormat.WEBP
-    else -> Bitmap.CompressFormat.JPEG
-}
-
 fun String.areDigitsOnly() = matches(Regex("[0-9]+"))
 
-fun String.areLettersOnly() = matches(Regex("[a-zA-Z]+"))
-
-fun String.getGenericMimeType(): String {
-    if (!contains("/"))
-        return this
-
-    val type = substring(0, indexOf("/"))
-    return "$type/*"
-}
-
 fun String.getParentPath() = removeSuffix("/${getFilenameFromPath()}")
-fun String.relativizeWith(path: String) = this.substring(path.length)
 
 fun String.containsNoMedia() = File(this).containsNoMedia()
-
-fun String.doesThisOrParentHaveNoMedia(folderNoMediaStatuses: HashMap<String, Boolean>, callback: ((path: String, hasNoMedia: Boolean) -> Unit)?) =
-    File(this).doesThisOrParentHaveNoMedia(folderNoMediaStatuses, callback)
 
 fun String.getImageResolution(context: Context): Point? {
     val options = BitmapFactory.Options()
@@ -159,16 +117,6 @@ fun String.getImageResolution(context: Context): Point? {
         Point(options.outWidth, options.outHeight)
     } else {
         null
-    }
-}
-
-fun String.getPublicUri(context: Context) = context.getDocumentFile(this)?.uri ?: ""
-
-fun String.substringTo(cnt: Int): String {
-    return if (isEmpty()) {
-        ""
-    } else {
-        substring(0, Math.min(length, cnt))
     }
 }
 
@@ -217,171 +165,8 @@ fun String.highlightTextPart(textToHighlight: String, color: Int, highlightAll: 
     return spannableString
 }
 
-// TODO: Use KMP search algorithm
-fun String.searchMatches(textToHighlight: String): ArrayList<Int> {
-    val indexes = arrayListOf<Int>()
-    var indexOf = indexOf(textToHighlight, 0, true)
-
-    var offset = 0
-    while (offset < length && indexOf != -1) {
-        indexOf = indexOf(textToHighlight, offset, true)
-
-        if (indexOf == -1) {
-            break
-        } else {
-            indexes.add(indexOf)
-        }
-
-        offset = indexOf + 1
-    }
-
-    return indexes
-}
-
-fun String.getFileSignature(lastModified: Long? = null) = ObjectKey(getFileKey(lastModified))
-
-fun String.getFileKey(lastModified: Long? = null): String {
-    val file = File(this)
-    val modified = if (lastModified != null && lastModified > 0) {
-        lastModified
-    } else {
-        file.lastModified()
-    }
-
-    return "${file.absolutePath}$modified"
-}
-
-fun String.getAvailableStorageB(): Long {
-    return try {
-        val stat = StatFs(this)
-        val bytesAvailable = stat.blockSizeLong * stat.availableBlocksLong
-        bytesAvailable
-    } catch (e: Exception) {
-        -1L
-    }
-}
-
 // remove diacritics, for example č -> c
 fun String.normalizeString() = Normalizer.normalize(this, Normalizer.Form.NFD).replace(normalizeRegex, "")
-
-// checks if string is a phone number
-fun String.isPhoneNumber(): Boolean {
-    return this.matches("^[0-9+\\-\\)\\( *#]+\$".toRegex())
-}
-
-// if we are comparing phone numbers, compare just the last 9 digits
-fun String.trimToComparableNumber(): String {
-    // don't trim if it's not a phone number
-    if (!this.isPhoneNumber()) {
-        return this
-    }
-    val normalizedNumber = this.normalizeString()
-    val startIndex = Math.max(0, normalizedNumber.length - 9)
-    return normalizedNumber.substring(startIndex)
-}
-
-// get the contact names first letter at showing the placeholder without image
-fun String.getNameLetter(): String {
-    return firstUserVisibleGrapheme()
-        ?.uppercase(Locale.getDefault())
-        ?: "A"
-}
-
-fun String.firstUserVisibleGrapheme(): String? {
-    val iterator = BreakIterator.getCharacterInstance(Locale.ROOT).also { it.setText(this) }
-    var start = iterator.first()
-    var end = iterator.next()
-    while (end != BreakIterator.DONE) {
-        val cluster = substring(start, end)
-        if (isUserVisibleCluster(cluster)) {
-            return cluster
-        }
-
-        start = end
-        end = iterator.next()
-    }
-    return null
-}
-
-private fun isUserVisibleCluster(text: String): Boolean {
-    if (text.isBlank()) return false
-    var i = 0
-    var substantive = false
-    while (i < text.length) {
-        val codePoint = text.codePointAt(i)
-        when (Character.getType(codePoint)) {
-            Character.NON_SPACING_MARK.toInt(),
-            Character.COMBINING_SPACING_MARK.toInt(),
-            Character.ENCLOSING_MARK.toInt(),
-            Character.FORMAT.toInt(),
-            Character.CONTROL.toInt(),
-            Character.SPACE_SEPARATOR.toInt(),
-            Character.LINE_SEPARATOR.toInt(),
-            Character.PARAGRAPH_SEPARATOR.toInt() -> {
-                // ignore these
-            }
-
-            else -> substantive = true
-        }
-        i += Character.charCount(codePoint)
-    }
-    return substantive
-}
-
-fun String.normalizePhoneNumber() = PhoneNumberUtils.normalizeNumber(this)
-
-fun String.formatPhoneNumber(minimumLength: Int = 4): String {
-    val country = Locale.getDefault().country
-    return if (this.length >= minimumLength) {
-        PhoneNumberUtils.formatNumber(this, country)?.toString() ?: this
-    } else {
-        this
-    }
-}
-
-fun String.highlightTextFromNumbers(textToHighlight: String, primaryColor: Int): SpannableString {
-    val spannableString = SpannableString(this)
-    val digits = KeypadHelper.convertKeypadLettersToDigits(this)
-    if (digits.contains(textToHighlight)) {
-        val startIndex = digits.indexOf(textToHighlight, 0, true)
-        val endIndex = Math.min(startIndex + textToHighlight.length, length)
-        try {
-            spannableString.setSpan(ForegroundColorSpan(primaryColor), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-        } catch (ignored: IndexOutOfBoundsException) {
-        }
-    }
-
-    return spannableString
-}
-
-fun String.getDateTimeFromDateString(showYearsSince: Boolean, viewToUpdate: TextView? = null): DateTime {
-    val dateFormats = getDateFormats()
-    var date = DateTime()
-    for (format in dateFormats) {
-        try {
-            date = DateTime.parse(this, DateTimeFormat.forPattern(format))
-
-            val formatter = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
-            var localPattern = (formatter as SimpleDateFormat).toLocalizedPattern()
-
-            val hasYear = format.contains("y")
-            if (!hasYear) {
-                localPattern = localPattern.replace("y", "").replace(",", "").trim()
-                date = date.withYear(DateTime().year)
-            }
-
-            var formattedString = date.toString(localPattern)
-            if (showYearsSince && hasYear) {
-                formattedString += " (${Years.yearsBetween(date, DateTime.now()).years})"
-            }
-
-            viewToUpdate?.text = formattedString
-            break
-        } catch (ignored: Exception) {
-        }
-    }
-    return date
-}
 
 fun String.getMimeType(): String {
     val typesMap = HashMap<String, String>().apply {
@@ -998,18 +783,8 @@ fun String?.normalizeMimeTypeForSharing(): String {
     }
 }
 
-fun String.isBlockedNumberPattern() = contains("*")
-
 fun String?.fromHtml(): Spanned =
     when {
         this == null -> SpannableString("")
         else -> Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY)
     }
-
-/**
- * Returns a consistent background color for contact names based on their hash code.
- * This is based on the existing logic from SimpleContactHelper.getContactLetterIcon().
- */
-fun String.getNameColor(): Int {
-    return letterBackgroundColors[abs(this.hashCode()) % letterBackgroundColors.size].toInt()
-}

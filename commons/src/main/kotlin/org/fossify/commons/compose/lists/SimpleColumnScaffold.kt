@@ -5,8 +5,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,9 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import org.fossify.commons.compose.extensions.AdjustNavigationBarColors
-import org.fossify.commons.compose.extensions.MyDevices
 import org.fossify.commons.compose.extensions.rememberMutableInteractionSource
-import org.fossify.commons.compose.theme.AppThemeSurface
 
 @Composable
 fun SimpleColumnScaffold(
@@ -70,7 +66,6 @@ fun SimpleColumnScaffold(
         }
     }
 }
-
 
 @Composable
 fun SimpleColumnScaffold(
@@ -220,22 +215,6 @@ fun SimpleColumnScaffold(
                 content(paddingValues)
                 Spacer(modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()))
             }
-        }
-    }
-}
-
-
-@MyDevices
-@Composable
-private fun SimpleColumnScaffoldPreview() {
-    AppThemeSurface {
-        SimpleColumnScaffold(title = "About", goBack = {}) {
-            ListItem(
-                headlineContent = { Text(text = "Some text") },
-                leadingContent = {
-                    Icon(imageVector = Icons.Filled.AccessTime, contentDescription = null)
-                }
-            )
         }
     }
 }

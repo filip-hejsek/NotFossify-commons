@@ -1,6 +1,5 @@
 package org.fossify.commons.extensions
 
-import java.util.Collections
 
 fun List<String>.getMimeType(): String {
     val mimeGroups = HashSet<String>(size)
@@ -21,13 +20,3 @@ fun List<String>.getMimeType(): String {
         else -> "*/*"
     }
 }
-
-fun <T> List<T>.rotate(distance: Int): List<T> {
-    return toMutableList().apply {
-        Collections.rotate(this, distance)
-    }
-}
-
-fun <T> List<T>.rotateRight(distance: Int) = rotate(distance)
-
-fun <T> List<T>.rotateLeft(distance: Int) = rotate(-distance)

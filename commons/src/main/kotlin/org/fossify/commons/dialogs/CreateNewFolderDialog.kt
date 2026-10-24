@@ -2,26 +2,10 @@ package org.fossify.commons.dialogs
 
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import org.fossify.commons.R
 import org.fossify.commons.activities.BaseSimpleActivity
-import org.fossify.commons.compose.alert_dialog.*
-import org.fossify.commons.compose.extensions.MyDevices
-import org.fossify.commons.compose.theme.AppThemeSurface
-import org.fossify.commons.compose.theme.SimpleTheme
 import org.fossify.commons.databinding.DialogCreateNewFolderBinding
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.isRPlus
@@ -102,114 +86,5 @@ class CreateNewFolderDialog(val activity: BaseSimpleActivity, val path: String, 
     private fun sendSuccess(alertDialog: AlertDialog, path: String) {
         callback(path.trimEnd('/'))
         alertDialog.dismiss()
-    }
-}
-
-@Composable
-fun CreateNewFolderAlertDialog(
-    alertDialogState: AlertDialogState,
-    path: String,
-    modifier: Modifier = Modifier,
-    callback: (path: String) -> Unit
-) {
-    val focusRequester = remember { FocusRequester() }
-    val context = LocalContext.current
-    val view = LocalView.current
-    var title by remember { mutableStateOf("") }
-
-    AlertDialog(
-        modifier = modifier.dialogBorder(),
-        shape = dialogShape,
-        containerColor = dialogContainerColor,
-        tonalElevation = dialogElevation,
-        onDismissRequest = alertDialogState::hide,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    alertDialogState.hide()
-                    //add callback
-                    val name = title
-                    when {
-                        name.isEmpty() -> context.toast(R.string.empty_name)
-                        name.isAValidFilename() -> {
-                            val file = File(path, name)
-                            if (file.exists()) {
-                                context.toast(R.string.name_taken)
-                                return@TextButton
-                            }
-
-                            callback("$path/$name")
-                        }
-
-                        else -> context.toast(R.string.invalid_name)
-                    }
-                }
-            ) {
-                Text(text = stringResource(id = R.string.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = alertDialogState::hide
-            ) {
-                Text(text = stringResource(id = R.string.cancel))
-            }
-        },
-        title = {
-            Text(
-                text = stringResource(id = R.string.create_new_folder),
-                color = dialogTextColor,
-                fontSize = 21.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        },
-        text = {
-            Column(
-                Modifier.fillMaxWidth(),
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    value = if (!view.isInEditMode) "${context.humanizePath(path).trimEnd('/')}/" else path,
-                    onValueChange = {},
-                    label = {
-                        Text(text = stringResource(id = R.string.folder))
-                    },
-                    enabled = false,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = dialogTextColor,
-                        disabledBorderColor = SimpleTheme.colorScheme.primary,
-                        disabledLabelColor = SimpleTheme.colorScheme.primary,
-                    )
-                )
-
-                Spacer(modifier = Modifier.padding(vertical = SimpleTheme.dimens.padding.medium))
-
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
-                    value = title,
-                    onValueChange = {
-                        title = it
-                    },
-                    label = {
-                        Text(text = stringResource(id = R.string.title))
-                    },
-                )
-            }
-        }
-    )
-    ShowKeyboardWhenDialogIsOpenedAndRequestFocus(focusRequester = focusRequester)
-}
-
-@MyDevices
-@Composable
-private fun CreateNewFolderAlertDialogPreview() {
-    AppThemeSurface {
-        CreateNewFolderAlertDialog(
-            alertDialogState = rememberAlertDialogState(),
-            path = "Internal/"
-        ) {}
     }
 }

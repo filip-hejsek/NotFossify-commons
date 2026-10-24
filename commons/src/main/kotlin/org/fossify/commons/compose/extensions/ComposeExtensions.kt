@@ -12,24 +12,17 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.compose.LifecycleStartEffect
-import org.fossify.commons.R
 import org.fossify.commons.compose.system_ui_controller.rememberSystemUiController
 import org.fossify.commons.compose.theme.SimpleTheme
 import org.fossify.commons.compose.theme.isLitWell
 import org.fossify.commons.extensions.darkenColor
-import org.fossify.commons.extensions.launchViewIntent
 
 fun Context.getActivity(): Activity {
     return when (this) {
@@ -38,8 +31,6 @@ fun Context.getActivity(): Activity {
         else -> getActivity()
     }
 }
-
-fun Context.getComponentActivity(): ComponentActivity = getActivity() as ComponentActivity
 
 @Composable
 fun rememberMutableInteractionSource() = remember { MutableInteractionSource() }
@@ -66,33 +57,6 @@ fun <T : Any> onEventValue(event: Lifecycle.Event = Lifecycle.Event.ON_START, va
     }
     return rememberedValue
 }
-
-@Composable
-fun <T : Any> onStartEventValue(vararg keys: Any?, onStopOrDispose: (LifecycleOwner.() -> Unit)? = null, value: () -> T): T {
-    val rememberLatestUpdateState by rememberUpdatedState(newValue = value)
-    var rememberedValue by remember { mutableStateOf(value()) }
-    LifecycleStartEffect(keys = keys, effects = {
-        rememberedValue = rememberLatestUpdateState()
-        onStopOrDispose {
-            onStopOrDispose?.invoke(this)
-        }
-    })
-    return rememberedValue
-}
-
-@Composable
-fun <T : Any> onResumeEventValue(vararg keys: Any?, onPauseOrDispose: (LifecycleOwner.() -> Unit)? = null, value: () -> T): T {
-    val rememberLatestUpdateState by rememberUpdatedState(newValue = value)
-    var rememberedValue by remember { mutableStateOf(value()) }
-    LifecycleResumeEffect(keys = keys, effects = {
-        rememberedValue = rememberLatestUpdateState()
-        onPauseOrDispose {
-            onPauseOrDispose?.invoke(this)
-        }
-    })
-    return rememberedValue
-}
-
 
 @Composable
 operator fun PaddingValues.plus(otherPaddingValues: PaddingValues): PaddingValues {
@@ -137,7 +101,6 @@ private fun Array<out PaddingValues>.sumOfDps(aggregator: PaddingValues.() -> Dp
         paddingValues.aggregator()
     }.sumOfDps()
 
-
 private fun Sequence<Dp>.sumOfDps(): Dp {
     var sum = 0.dp
     for (element in this) {
@@ -160,14 +123,5 @@ internal fun TransparentSystemBars(darkIcons: Boolean = !isSystemInDarkTheme()) 
             darkIcons = darkIcons
         )
         onDispose { }
-    }
-}
-
-@Composable
-fun composeDonateIntent(): () -> Unit {
-    val localContext = LocalContext.current
-    val localView = LocalView.current
-    return {
-        if (localView.isInEditMode) Unit else localContext.getActivity().launchViewIntent(R.string.thank_you_url)
     }
 }

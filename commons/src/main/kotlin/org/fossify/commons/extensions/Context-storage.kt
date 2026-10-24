@@ -10,14 +10,11 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
 import android.provider.MediaStore.*
 import android.text.TextUtils
 import androidx.annotation.RequiresApi
-import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import org.fossify.commons.R
@@ -29,8 +26,11 @@ import java.util.*
 import java.util.regex.Pattern
 
 private const val ANDROID_DATA_DIR = "/Android/data/"
+
 private const val ANDROID_OBB_DIR = "/Android/obb/"
+
 val DIRS_ACCESSIBLE_ONLY_WITH_SAF = listOf(ANDROID_DATA_DIR, ANDROID_OBB_DIR)
+
 val Context.recycleBinPath: String get() = filesDir.absolutePath
 
 // http://stackoverflow.com/a/40582634/1967672
@@ -256,27 +256,6 @@ fun Context.isAStorageRootFolder(path: String): Boolean {
     return trimmed.isEmpty() || trimmed.equals(internalStoragePath, true) || trimmed.equals(sdCardPath, true) || trimmed.equals(otgPath, true)
 }
 
-fun Context.getMyFileUri(file: File): Uri {
-    return if (isNougatPlus()) {
-        FileProvider.getUriForFile(this, "$packageName.provider", file)
-    } else {
-        Uri.fromFile(file)
-    }
-}
-
-fun Context.tryFastDocumentDelete(path: String, allowDeleteFolder: Boolean): Boolean {
-    val document = getFastDocumentFile(path)
-    return if (document?.isFile == true || allowDeleteFolder) {
-        try {
-            DocumentsContract.deleteDocument(contentResolver, document?.uri!!)
-        } catch (e: Exception) {
-            false
-        }
-    } else {
-        false
-    }
-}
-
 fun Context.getFastDocumentFile(path: String): DocumentFile? {
     if (isPathOnOTG(path)) {
         return getOTGFastDocumentFile(path)
@@ -330,20 +309,8 @@ fun Context.getDocumentFile(path: String): DocumentFile? {
 
 fun Context.getSomeDocumentFile(path: String) = getFastDocumentFile(path) ?: getDocumentFile(path)
 
-fun Context.scanFileRecursively(file: File, callback: (() -> Unit)? = null) {
-    scanFilesRecursively(arrayListOf(file), callback)
-}
-
 fun Context.scanPathRecursively(path: String, callback: (() -> Unit)? = null) {
     scanPathsRecursively(arrayListOf(path), callback)
-}
-
-fun Context.scanFilesRecursively(files: List<File>, callback: (() -> Unit)? = null) {
-    val allPaths = ArrayList<String>()
-    for (file in files) {
-        allPaths.addAll(getPaths(file))
-    }
-    rescanPaths(allPaths, callback)
 }
 
 fun Context.scanPathsRecursively(paths: List<String>, callback: (() -> Unit)? = null) {
@@ -414,23 +381,6 @@ fun Context.deleteFromMediaStore(path: String, callback: ((needsRescan: Boolean)
         } catch (ignored: Exception) {
             callback?.invoke(true)
         }
-    }
-}
-
-fun Context.rescanAndDeletePath(path: String, callback: () -> Unit) {
-    val SCAN_FILE_MAX_DURATION = 1000L
-    val scanFileHandler = Handler(Looper.getMainLooper())
-    scanFileHandler.postDelayed({
-        callback()
-    }, SCAN_FILE_MAX_DURATION)
-
-    MediaScannerConnection.scanFile(applicationContext, arrayOf(path), null) { path, uri ->
-        scanFileHandler.removeCallbacksAndMessages(null)
-        try {
-            applicationContext.contentResolver.delete(uri, null, null)
-        } catch (e: Exception) {
-        }
-        callback()
     }
 }
 
@@ -662,7 +612,6 @@ fun Context.createAndroidSAFDocumentId(path: String): String {
     return "$storageId:$relativePath"
 }
 
-
 fun Context.getAndroidSAFUri(path: String): Uri {
     val treeUri = getAndroidTreeUri(path).toUri()
     val documentId = createAndroidSAFDocumentId(path)
@@ -700,12 +649,6 @@ fun Context.getFastAndroidSAFDocument(path: String): DocumentFile? {
 
     val uri = getAndroidSAFUri(path)
     return DocumentFile.fromSingleUri(this, uri)
-}
-
-fun Context.getAndroidSAFChildrenUri(path: String): Uri {
-    val treeUri = getAndroidTreeUri(path).toUri()
-    val documentId = createAndroidSAFDocumentId(path)
-    return DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId)
 }
 
 fun Context.createAndroidSAFDirectory(path: String): Boolean {
@@ -797,41 +740,6 @@ fun Context.getAndroidSAFLastModified(path: String): Long {
             0L
         }
     } ?: 0L
-}
-
-fun Context.deleteAndroidSAFDirectory(path: String, allowDeleteFolder: Boolean = false, callback: ((wasSuccess: Boolean) -> Unit)? = null) {
-    val treeUri = getAndroidTreeUri(path).toUri()
-    val documentId = createAndroidSAFDocumentId(path)
-    try {
-        val uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId)
-        val document = DocumentFile.fromSingleUri(this, uri)
-        val fileDeleted = (document!!.isFile || allowDeleteFolder) && DocumentsContract.deleteDocument(applicationContext.contentResolver, document.uri)
-        callback?.invoke(fileDeleted)
-    } catch (e: Exception) {
-        showErrorToast(e)
-        callback?.invoke(false)
-        storeAndroidTreeUri(path, "")
-    }
-}
-
-fun Context.trySAFFileDelete(fileDirItem: FileDirItem, allowDeleteFolder: Boolean = false, callback: ((wasSuccess: Boolean) -> Unit)? = null) {
-    var fileDeleted = tryFastDocumentDelete(fileDirItem.path, allowDeleteFolder)
-    if (!fileDeleted) {
-        val document = getDocumentFile(fileDirItem.path)
-        if (document != null && (fileDirItem.isDirectory == document.isDirectory)) {
-            try {
-                fileDeleted = (document.isFile || allowDeleteFolder) && DocumentsContract.deleteDocument(applicationContext.contentResolver, document.uri)
-            } catch (ignored: Exception) {
-                baseConfig.sdTreeUri = ""
-                baseConfig.sdCardPath = ""
-            }
-        }
-    }
-
-    if (fileDeleted) {
-        deleteFromMediaStore(fileDirItem.path)
-        callback?.invoke(true)
-    }
 }
 
 fun Context.getFileInputStreamSync(path: String): InputStream? {
@@ -993,22 +901,6 @@ fun Context.getFileUrisFromFileDirItems(fileDirItems: List<FileDirItem>): List<U
     }
 
     return fileUris
-}
-
-fun Context.getDefaultCopyDestinationPath(showHidden: Boolean, currentPath: String): String {
-    val lastCopyPath = baseConfig.lastCopyPath
-
-    return if (getDoesFilePathExist(lastCopyPath)) {
-        val isLastCopyPathVisible = !lastCopyPath.split(File.separator).any { it.startsWith(".") && it.length > 1 }
-
-        if (showHidden || isLastCopyPathVisible) {
-            lastCopyPath
-        } else {
-            currentPath
-        }
-    } else {
-        currentPath
-    }
 }
 
 fun Context.createDirectorySync(directory: String): Boolean {

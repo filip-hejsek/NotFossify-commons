@@ -13,6 +13,6 @@ dependencyResolutionManagement {
         maven { setUrl("https://jitpack.io") }
     }
 }
-rootProject.name = "Fossify-Commons"
+rootProject.name = "NotFossify-Commons"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-include(":commons", ":samples")
+include(":commons")

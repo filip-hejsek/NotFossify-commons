@@ -4,7 +4,6 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.ActionBar
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import org.fossify.commons.R
 import org.fossify.commons.activities.BaseSimpleActivity
@@ -256,23 +255,6 @@ abstract class MyRecyclerViewAdapter(val activity: BaseSimpleActivity, val recyc
                 for (i in min until from) {
                     toggleItemSelection(false, i, true)
                 }
-            }
-        }
-    }
-
-    fun setupZoomListener(zoomListener: MyRecyclerView.MyZoomListener?) {
-        recyclerView.setupZoomListener(zoomListener)
-    }
-
-    fun addVerticalDividers(add: Boolean) {
-        if (recyclerView.itemDecorationCount > 0) {
-            recyclerView.removeItemDecorationAt(0)
-        }
-
-        if (add) {
-            DividerItemDecoration(activity, DividerItemDecoration.VERTICAL).apply {
-                setDrawable(resources.getDrawable(R.drawable.divider))
-                recyclerView.addItemDecoration(this)
             }
         }
     }

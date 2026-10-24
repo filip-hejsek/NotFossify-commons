@@ -35,8 +35,6 @@ import org.fossify.commons.extensions.getSomeAndroidSAFDocument
 import org.fossify.commons.extensions.getSomeDocumentFile
 import org.fossify.commons.extensions.getSomeDocumentSdk30
 import org.fossify.commons.extensions.getTextSize
-import org.fossify.commons.extensions.handleHiddenFolderPasswordProtection
-import org.fossify.commons.extensions.handleLockedFolderOpening
 import org.fossify.commons.extensions.internalStoragePath
 import org.fossify.commons.extensions.isAccessibleWithSAFSdk30
 import org.fossify.commons.extensions.isInDownloadDir
@@ -129,11 +127,9 @@ class FilePickerDialog(
         mDialogView.filepickerFabShowHidden.apply {
             beVisibleIf(!showHidden && canAddShowHiddenButton)
             setOnClickListener {
-                activity.handleHiddenFolderPasswordProtection {
-                    beGone()
-                    showHidden = true
-                    tryUpdateItems()
-                }
+                beGone()
+                showHidden = true
+                tryUpdateItems()
             }
         }
 
@@ -202,12 +198,8 @@ class FilePickerDialog(
         val sortedItems = items.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
         val adapter = FilepickerItemsAdapter(activity, sortedItems, mDialogView.filepickerList) {
             if ((it as FileDirItem).isDirectory) {
-                activity.handleLockedFolderOpening(it.path) { success ->
-                    if (success) {
-                        currPath = it.path
-                        tryUpdateItems()
-                    }
-                }
+                currPath = it.path
+                tryUpdateItems()
             } else if (pickFile) {
                 currPath = it.path
                 verifyPath()

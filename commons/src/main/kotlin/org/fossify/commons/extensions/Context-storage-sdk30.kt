@@ -9,11 +9,12 @@ import androidx.documentfile.provider.DocumentFile
 import org.fossify.commons.helpers.EXTERNAL_STORAGE_PROVIDER_AUTHORITY
 import org.fossify.commons.helpers.isRPlus
 import org.fossify.commons.helpers.isSPlus
-import org.fossify.commons.models.FileDirItem
 import java.io.File
 
 private const val DOWNLOAD_DIR = "Download"
+
 private const val ANDROID_DIR = "Android"
+
 private val DIRS_INACCESSIBLE_WITH_SAF_SDK_30 = listOf(DOWNLOAD_DIR, ANDROID_DIR)
 
 fun Context.hasProperStoredFirstParentUri(path: String): Boolean {
@@ -202,25 +203,6 @@ fun Context.getDocumentSdk30(path: String): DocumentFile? {
     }
 }
 
-fun Context.deleteDocumentWithSAFSdk30(fileDirItem: FileDirItem, allowDeleteFolder: Boolean, callback: ((wasSuccess: Boolean) -> Unit)?) {
-    try {
-        var fileDeleted = false
-        if (fileDirItem.isDirectory.not() || allowDeleteFolder) {
-            val fileUri = createDocumentUriUsingFirstParentTreeUri(fileDirItem.path)
-            fileDeleted = DocumentsContract.deleteDocument(contentResolver, fileUri)
-        }
-
-        if (fileDeleted) {
-            deleteFromMediaStore(fileDirItem.path)
-            callback?.invoke(true)
-        }
-
-    } catch (e: Exception) {
-        callback?.invoke(false)
-        showErrorToast(e)
-    }
-}
-
 fun Context.renameDocumentSdk30(oldPath: String, newPath: String): Boolean {
     return try {
         val treeUri = createFirstParentTreeUri(oldPath)
@@ -248,9 +230,4 @@ fun Context.buildDocumentUriSdk30(fullPath: String): Uri {
 
     val documentId = "${storageId}:$relativePath"
     return DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, documentId)
-}
-
-fun Context.getPicturesDirectoryPath(fullPath: String): String {
-    val basePath = fullPath.getBasePath(this)
-    return File(basePath, Environment.DIRECTORY_PICTURES).absolutePath
 }

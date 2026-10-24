@@ -12,15 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.fossify.commons.R
-import org.fossify.commons.compose.extensions.MyDevices
 import org.fossify.commons.compose.extensions.rememberMutableInteractionSource
-import org.fossify.commons.compose.theme.AppThemeSurface
 import org.fossify.commons.compose.theme.SimpleTheme
 
 @Composable
@@ -185,23 +182,6 @@ fun SimpleBackIcon(iconColor: Color?) {
             imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back),
             tint = iconColor,
             modifier = Modifier.size(SimpleTheme.dimens.icon.extraSmall)
-        )
-    }
-}
-
-
-@Composable
-@MyDevices
-private fun SimpleScaffoldTopBarPreview() {
-    AppThemeSurface {
-        SimpleScaffoldTopBar(
-            title = "SettingsScaffoldTopBar",
-            scrolledColor = Color.Black,
-            navigationIconInteractionSource = rememberMutableInteractionSource(),
-            goBack = {},
-            statusBarColor = Color.Magenta.toArgb(),
-            colorTransitionFraction = 1.0f,
-            contrastColor = Color.White
         )
     }
 }
