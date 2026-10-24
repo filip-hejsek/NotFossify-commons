@@ -22,75 +22,19 @@ private val titleStartPadding = Modifier.padding(start = 40.dp)
 @Composable
 internal fun AboutScreen(
     goBack: () -> Unit,
-    helpUsSection: @Composable () -> Unit,
     aboutSection: @Composable () -> Unit,
-    socialSection: @Composable () -> Unit,
+    sourceCodeSection: @Composable () -> Unit,
     otherSection: @Composable () -> Unit,
 ) {
     SimpleColumnScaffold(title = stringResource(id = R.string.about), goBack = goBack) {
         aboutSection()
-        helpUsSection()
-        socialSection()
+        sourceCodeSection()
         otherSection()
-//        SettingsListItem(text = stringResource(id = R.string.about_footer))
-    }
-}
-
-@Composable
-internal fun HelpUsSection(
-    onRateThisAppClick: () -> Unit,
-    onInviteClick: () -> Unit,
-    onContributorsClick: () -> Unit,
-    showRateUs: Boolean,
-    showInvite: Boolean,
-    showDonate: Boolean,
-    onDonateClick: () -> Unit,
-) {
-    SettingsGroup(title = {
-        SettingsTitleTextComponent(
-            text = stringResource(id = R.string.help_us),
-            modifier = titleStartPadding
-        )
-    }) {
-        if (showRateUs) {
-            TwoLinerTextItem(
-                text = stringResource(id = R.string.rate_this_app),
-                icon = R.drawable.ic_star_outline_vector,
-                click = onRateThisAppClick
-            )
-        }
-
-        if (showInvite) {
-            TwoLinerTextItem(
-                text = stringResource(id = R.string.invite_friends),
-                icon = R.drawable.ic_share_outline_vector,
-                click = onInviteClick
-            )
-        }
-
-        TwoLinerTextItem(
-            click = onContributorsClick,
-            text = stringResource(id = R.string.contributors),
-            icon = R.drawable.ic_groups_outline_vector
-        )
-
-        if (showDonate) {
-            TwoLinerTextItem(
-                click = onDonateClick,
-                text = stringResource(id = R.string.donate_to_fossify),
-                icon = R.drawable.ic_donate_outline_vector
-            )
-        }
-
-        SettingsHorizontalDivider()
     }
 }
 
 @Composable
 internal fun OtherSection(
-    showMoreApps: Boolean,
-    onMoreAppsClick: () -> Unit,
-    onPrivacyPolicyClick: () -> Unit,
     onLicenseClick: () -> Unit,
     versionName: String,
     packageName: String,
@@ -102,19 +46,6 @@ internal fun OtherSection(
             modifier = titleStartPadding
         )
     }) {
-        if (showMoreApps) {
-            TwoLinerTextItem(
-                click = onMoreAppsClick,
-                text = stringResource(id = R.string.more_fossify_apps),
-                icon = R.drawable.ic_apps_vector
-            )
-        }
-
-        TwoLinerTextItem(
-            click = onPrivacyPolicyClick,
-            text = stringResource(id = R.string.privacy_policy),
-            icon = R.drawable.ic_policy_outline_vector
-        )
         TwoLinerTextItem(
             click = onLicenseClick,
             text = stringResource(id = R.string.third_party_licences),
@@ -136,11 +67,7 @@ internal fun OtherSection(
 
 @Composable
 internal fun AboutSection(
-    setupFAQ: Boolean,
-    setupKnownIssues: Boolean,
     onFAQClick: () -> Unit,
-    onKnownIssuesClick: () -> Unit,
-    onEmailClick: () -> Unit,
 ) {
     SettingsGroup(title = {
         SettingsTitleTextComponent(
@@ -148,58 +75,30 @@ internal fun AboutSection(
             modifier = titleStartPadding
         )
     }) {
-        if (setupFAQ) {
-            TwoLinerTextItem(
-                click = onFAQClick,
-                text = stringResource(id = R.string.frequently_asked_questions),
-                icon = R.drawable.ic_help_outline_vector
-            )
-        }
-
-        if (setupKnownIssues) {
-            TwoLinerTextItem(
-                click = onKnownIssuesClick,
-                text = stringResource(R.string.known_issues),
-                icon = R.drawable.ic_bug_report_outline_vector
-            )
-        }
-
         TwoLinerTextItem(
-            click = onEmailClick,
-            text = stringResource(id = R.string.my_email),
-            icon = R.drawable.ic_contact_support_outline_vector
+            click = onFAQClick,
+            text = stringResource(id = R.string.frequently_asked_questions),
+            icon = R.drawable.ic_help_outline_vector
         )
         SettingsHorizontalDivider()
     }
 }
 
 @Composable
-internal fun SocialSection(
-    onGithubClick: () -> Unit,
-    onRedditClick: () -> Unit,
-    onTelegramClick: () -> Unit,
+internal fun SourceCodeSection(
+    onSourceCodeClick: () -> Unit,
 ) {
     SettingsGroup(title = {
         SettingsTitleTextComponent(
-            text = stringResource(id = R.string.social),
+            text = stringResource(id = R.string.source_code),
             modifier = titleStartPadding
         )
     }) {
         SocialText(
-            click = onGithubClick,
+            click = onSourceCodeClick,
             text = stringResource(id = R.string.github),
             icon = R.drawable.ic_github_vector,
             tint = SimpleTheme.colorScheme.onSurface
-        )
-        SocialText(
-            click = onRedditClick,
-            text = stringResource(id = R.string.reddit),
-            icon = R.drawable.ic_reddit_vector,
-        )
-        SocialText(
-            click = onTelegramClick,
-            text = stringResource(id = R.string.telegram),
-            icon = R.drawable.ic_telegram_vector,
         )
         SettingsHorizontalDivider()
     }
@@ -241,37 +140,14 @@ private fun AboutScreenPreview() {
     AppThemeSurface {
         AboutScreen(
             goBack = {},
-            helpUsSection = {
-                HelpUsSection(
-                    onRateThisAppClick = {},
-                    onInviteClick = {},
-                    onContributorsClick = {},
-                    showRateUs = true,
-                    showInvite = true,
-                    showDonate = true,
-                    onDonateClick = {}
-                )
-            },
             aboutSection = {
-                AboutSection(
-                    setupFAQ = true,
-                    setupKnownIssues = true,
-                    onFAQClick = {},
-                    onKnownIssuesClick = {},
-                    onEmailClick = {})
+                AboutSection(onFAQClick = {})
             },
-            socialSection = {
-                SocialSection(
-                    onGithubClick = {},
-                    onRedditClick = {},
-                    onTelegramClick = {}
-                )
+            sourceCodeSection = {
+                SourceCodeSection(onSourceCodeClick = {})
             }
         ) {
             OtherSection(
-                showMoreApps = true,
-                onMoreAppsClick = {},
-                onPrivacyPolicyClick = {},
                 onLicenseClick = {},
                 versionName = "5.0.4",
                 packageName = "org.fossify.commons.samples",

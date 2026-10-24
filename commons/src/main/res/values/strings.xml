@@ -1076,6 +1076,7 @@
 
     <!-- License -->
     <string name="third_party_licences">Third-party licences</string>
+    <string name="source_code">Source code</string>
     <string name="kotlin_title">Kotlin (programming language)</string>
     <string name="subsampling_title">Subsampling Scale Image View (zoomable imageviews)</string>
     <string name="glide_title">Glide (image loading and caching)</string>

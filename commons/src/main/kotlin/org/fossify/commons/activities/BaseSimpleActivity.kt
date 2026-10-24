@@ -89,7 +89,6 @@ import org.fossify.commons.extensions.openDeviceSettings
 import org.fossify.commons.extensions.openNotificationSettings
 import org.fossify.commons.extensions.random
 import org.fossify.commons.extensions.showErrorToast
-import org.fossify.commons.extensions.showModdedAppWarning
 import org.fossify.commons.extensions.storeAndroidTreeUri
 import org.fossify.commons.extensions.toast
 import org.fossify.commons.extensions.updateOTGPathFromPartition
@@ -100,7 +99,7 @@ import org.fossify.commons.helpers.APP_LAUNCHER_NAME
 import org.fossify.commons.helpers.APP_LICENSES
 import org.fossify.commons.helpers.APP_NAME
 import org.fossify.commons.helpers.APP_PACKAGE_NAME
-import org.fossify.commons.helpers.APP_REPOSITORY_NAME
+import org.fossify.commons.helpers.APP_REPOSITORY_URL
 import org.fossify.commons.helpers.APP_VERSION_NAME
 import org.fossify.commons.helpers.CONFLICT_KEEP_BOTH
 import org.fossify.commons.helpers.CONFLICT_SKIP
@@ -120,7 +119,6 @@ import org.fossify.commons.helpers.REQUEST_CODE_SET_DEFAULT_CALLER_ID
 import org.fossify.commons.helpers.REQUEST_CODE_SET_DEFAULT_DIALER
 import org.fossify.commons.helpers.SD_OTG_SHORT
 import org.fossify.commons.helpers.SELECT_EXPORT_SETTINGS_FILE_INTENT
-import org.fossify.commons.helpers.SHOW_FAQ_BEFORE_MAIL
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.getConflictResolution
 import org.fossify.commons.helpers.isQPlus
@@ -167,7 +165,7 @@ abstract class BaseSimpleActivity : EdgeToEdgeActivity() {
 
     abstract fun getAppLauncherName(): String
 
-    abstract fun getRepositoryName(): String?
+    abstract fun getRepositoryUrl(): String?
 
     /** Return true if the back press was consumed. */
     protected open fun onBackPressedCompat(): Boolean = false
@@ -194,12 +192,6 @@ abstract class BaseSimpleActivity : EdgeToEdgeActivity() {
         useBinaryStorageUnits = baseConfig.useBinaryStorageUnits
         WindowCompat.enableEdgeToEdge(window)
         registerBackPressedCallback()
-
-        if (!packageName.startsWith("org.fossify.", true)) {
-            if ((0..50).random() == 10 || baseConfig.appRunCount % 100 == 0) {
-                showModdedAppWarning()
-            }
-        }
     }
 
     private fun installFontInflaterFactory() {
@@ -630,35 +622,18 @@ abstract class BaseSimpleActivity : EdgeToEdgeActivity() {
         appNameId: Int,
         licenseMask: Long,
         versionName: String,
-        faqItems: ArrayList<FAQItem>,
-        showFAQBeforeMail: Boolean
+        faqItems: ArrayList<FAQItem>
     ) {
         hideKeyboard()
         Intent(applicationContext, AboutActivity::class.java).apply {
             putExtra(APP_ICON_IDS, getAppIconIDs())
             putExtra(APP_LAUNCHER_NAME, getAppLauncherName())
             putExtra(APP_NAME, getString(appNameId))
-            putExtra(APP_REPOSITORY_NAME, getRepositoryName())
+            putExtra(APP_REPOSITORY_URL, getRepositoryUrl())
             putExtra(APP_LICENSES, licenseMask)
             putExtra(APP_VERSION_NAME, versionName)
             putExtra(APP_PACKAGE_NAME, baseConfig.appId)
             putExtra(APP_FAQ, faqItems)
-            putExtra(SHOW_FAQ_BEFORE_MAIL, showFAQBeforeMail)
-            startActivity(this)
-        }
-    }
-
-    fun startCustomizationActivity() {
-        if (!packageName.contains("yfissof".reversed(), true)) {
-            if (baseConfig.appRunCount > 100) {
-                showModdedAppWarning()
-                return
-            }
-        }
-
-        Intent(applicationContext, CustomizationActivity::class.java).apply {
-            putExtra(APP_ICON_IDS, getAppIconIDs())
-            putExtra(APP_LAUNCHER_NAME, getAppLauncherName())
             startActivity(this)
         }
     }
@@ -685,10 +660,7 @@ abstract class BaseSimpleActivity : EdgeToEdgeActivity() {
     // synchronous return value determines only if we are showing the SAF dialog, callback result tells if the SD or OTG permission has been granted
     fun handleSAFDialog(path: String, callback: (success: Boolean) -> Unit): Boolean {
         hideKeyboard()
-        return if (!packageName.startsWith("org.fossify")) {
-            callback(true)
-            false
-        } else if (isShowingSAFDialog(path) || isShowingOTGDialog(path)) {
+        return if (isShowingSAFDialog(path) || isShowingOTGDialog(path)) {
             funAfterSAFPermission = callback
             true
         } else {
@@ -703,10 +675,7 @@ abstract class BaseSimpleActivity : EdgeToEdgeActivity() {
         callback: (success: Boolean) -> Unit
     ): Boolean {
         hideKeyboard()
-        return if (!packageName.startsWith("org.fossify")) {
-            callback(true)
-            false
-        } else if (isShowingSAFDialogSdk30(path, showRationale)) {
+        return if (isShowingSAFDialogSdk30(path, showRationale)) {
             funAfterSdk30Action = callback
             true
         } else {
@@ -733,10 +702,7 @@ abstract class BaseSimpleActivity : EdgeToEdgeActivity() {
         callback: (success: Boolean) -> Unit
     ): Boolean {
         hideKeyboard()
-        return if (!packageName.startsWith("org.fossify")) {
-            callback(true)
-            false
-        } else if (isShowingSAFCreateDocumentDialogSdk30(path)) {
+        return if (isShowingSAFCreateDocumentDialogSdk30(path)) {
             funAfterSdk30Action = callback
             true
         } else {
@@ -751,10 +717,7 @@ abstract class BaseSimpleActivity : EdgeToEdgeActivity() {
         callback: (success: Boolean) -> Unit
     ): Boolean {
         hideKeyboard()
-        return if (!packageName.startsWith("org.fossify")) {
-            callback(true)
-            false
-        } else if (isShowingAndroidSAFDialog(path, openInSystemAppAllowed)) {
+        return if (isShowingAndroidSAFDialog(path, openInSystemAppAllowed)) {
             funAfterSAFPermission = callback
             true
         } else {

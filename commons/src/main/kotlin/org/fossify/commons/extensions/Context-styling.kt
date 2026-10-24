@@ -146,47 +146,13 @@ fun Context.getPopupMenuTheme(): Int {
     }
 }
 
+/** Resets settings that only the Fossify Thank You app's global config could set. */
 fun Context.syncGlobalConfig(callback: (() -> Unit)? = null) {
-    if (canAccessGlobalConfig()) {
-        withGlobalConfig {
-            baseConfig.useBinaryStorageUnits = it?.useBinaryStorageUnits ?: false
-            if (it != null) {
-                baseConfig.apply {
-                    showCheckmarksOnSwitches = it.showCheckmarksOnSwitches
-                    if (it.isGlobalThemingEnabled()) {
-                        isGlobalThemeEnabled = true
-                        isSystemThemeEnabled = it.themeType == GLOBAL_THEME_SYSTEM
-                        textColor = it.textColor
-                        backgroundColor = it.backgroundColor
-                        primaryColor = it.primaryColor
-                        accentColor = it.accentColor
-
-                        if (it.fontType >= 0 && (fontType != it.fontType || fontName != it.fontName)) {
-                            if (it.fontType != FONT_TYPE_CUSTOM || ensureFontPresentLocally(it.fontName)) {
-                                fontType = it.fontType
-                                fontName = it.fontName
-                            }
-                            FontHelper.clearCache()
-                        }
-
-                        if (baseConfig.appIconColor != it.appIconColor) {
-                            baseConfig.appIconColor = it.appIconColor
-                            checkAppIconColor()
-                        }
-                    }
-                }
-            }
-
-            validateFontSettings()
-            callback?.invoke()
-        }
-    } else {
-        baseConfig.isGlobalThemeEnabled = false
-        baseConfig.showCheckmarksOnSwitches = false
-        baseConfig.useBinaryStorageUnits = false
-        validateFontSettings()
-        callback?.invoke()
-    }
+    baseConfig.isGlobalThemeEnabled = false
+    baseConfig.showCheckmarksOnSwitches = false
+    baseConfig.useBinaryStorageUnits = false
+    validateFontSettings()
+    callback?.invoke()
 }
 
 private fun Context.validateFontSettings() {
@@ -238,22 +204,7 @@ fun Context.getGlobalConfig(cursorLoader: CursorLoader): GlobalConfig? {
 
 fun Context.ensureFontPresentLocally(fontName: String): Boolean {
     if (fontName.isEmpty()) return false
-    val localFile = File(FontHelper.getFontsDir(this), fontName)
-    if (localFile.exists()) return true
-
-    val fontUri = MyContentProvider.FONTS_URI.buildUpon()
-        .appendPath(fontName)
-        .build()
-
-    return try {
-        contentResolver.openInputStream(fontUri)?.use { input ->
-            localFile.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        } != null
-    } catch (_: Exception) {
-        false
-    }
+    return File(FontHelper.getFontsDir(this), fontName).exists()
 }
 
 fun Context.checkAppIconColor() {
